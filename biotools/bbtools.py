@@ -15,10 +15,10 @@ def kwargs_to_string(kwargs):
     return outstr
 
 
-def bbmap(ref, forward_in, out_bam, reverse_in='NA', **kwargs):
+def bbmap(reference, forward_in, out_bam, reverse_in='NA', **kwargs):
     """
     Wrapper for bbmap. Assumes that bbmap executable is in your $PATH.
-    :param ref: Reference fasta. Won't be written to disk by default. If you want it to be, add nodisk='t' as an arg.
+    :param reference: Reference fasta. Won't be written to disk by default. If you want it to be, add nodisk='t' as an arg.
     :param forward_in: Input reads. Should be in fastq format.
     :param out_bam: Output file. Should end in .sam or .bam
     :param reverse_in: If your reverse reads are present and normal conventions (R1 for forward, R2 for reverse) are
@@ -29,11 +29,11 @@ def bbmap(ref, forward_in, out_bam, reverse_in='NA', **kwargs):
     options = kwargs_to_string(kwargs)
     if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA':
         reverse_in = forward_in.replace('R1', 'R2')
-        cmd = 'bbmap.sh ref={} in={} in2={} out={} nodisk{}'.format(ref, forward_in, reverse_in, out_bam, options)
+        cmd = 'bbmap.sh ref={} in={} in2={} out={} nodisk{}'.format(reference, forward_in, reverse_in, out_bam, options)
     elif reverse_in == 'NA':
-        cmd = 'bbmap.sh ref={} in={} out={} nodisk{}'.format(ref, forward_in, out_bam, options)
+        cmd = 'bbmap.sh ref={} in={} out={} nodisk{}'.format(reference, forward_in, out_bam, options)
     else:
-        cmd = 'bbmap.sh ref={} in={} in2={} out={} nodisk{}'.format(ref, forward_in, reverse_in, out_bam, options)
+        cmd = 'bbmap.sh ref={} in={} in2={} out={} nodisk{}'.format(reference, forward_in, reverse_in, out_bam, options)
     out, err = accessoryfunctions.run_subprocess(cmd)
     return out, err
 
@@ -84,10 +84,10 @@ def bbduk_trim(forward_in, forward_out, reverse_in='NA', reverse_out='NA', **kwa
     return out, err
 
 
-def bbduk_bait(ref, forward_in, forward_out, reverse_in='NA', reverse_out='NA', **kwargs):
+def bbduk_bait(reference, forward_in, forward_out, reverse_in='NA', reverse_out='NA', **kwargs):
     """
     Uses bbduk to bait out reads that have kmers matching to a reference.
-    :param ref: Reference you want to pull reads out for. Should be in fasta format.
+    :param reference: Reference you want to pull reads out for. Should be in fasta format.
     :param forward_in: Forward reads you want to quality trim.
     :param forward_out: Output forward reads.
     :param reverse_in: Reverse input reads. Don't need to be specified if R1/R2 naming convention is used.
@@ -105,23 +105,23 @@ def bbduk_bait(ref, forward_in, forward_out, reverse_in='NA', reverse_out='NA', 
                 raise ValueError('If you do not specify reverse_out, forward_out must contain R1.\n\n')
         cmd = 'bbduk.sh in={} in2={} outm={} outm2={} ref={}{}'.format(forward_in, reverse_in,
                                                                        forward_out, reverse_out,
-                                                                       ref, options)
+                                                                       reference, options)
     elif reverse_in == 'NA':
-        cmd = 'bbduk.sh in={} outm={} ref={}{}'.format(forward_in, forward_out, ref, options)
+        cmd = 'bbduk.sh in={} outm={} ref={}{}'.format(forward_in, forward_out, reference, options)
     else:
         if reverse_out == 'NA':
             raise ValueError('Reverse output reads must be specified.')
         cmd = 'bbduk.sh in={} in2={} outm={} outm2={} ref={}{}'.format(forward_in, reverse_in,
                                                                        forward_out, reverse_out,
-                                                                       ref, options)
+                                                                       reference, options)
     out, err = accessoryfunctions.run_subprocess(cmd)
     return out, err
 
 
-def bbduk_filter(ref, forward_in, forward_out, reverse_in='NA', reverse_out='NA', **kwargs):
+def bbduk_filter(reference, forward_in, forward_out, reverse_in='NA', reverse_out='NA', **kwargs):
     """
     Uses bbduk to filter out reads that have kmers matching to a reference.
-    :param ref: Reference you want to pull reads out for. Should be in fasta format.
+    :param reference: Reference you want to pull reads out for. Should be in fasta format.
     :param forward_in: Forward reads you want to quality trim.
     :param forward_out: Output forward reads.
     :param reverse_in: Reverse input reads. Don't need to be specified if R1/R2 naming convention is used.
@@ -139,37 +139,37 @@ def bbduk_filter(ref, forward_in, forward_out, reverse_in='NA', reverse_out='NA'
                 raise ValueError('If you do not specify reverse_out, forward_out must contain R1.\n\n')
         cmd = 'bbduk.sh in={} in2={} out={} out2={} ref={}{}'.format(forward_in, reverse_in,
                                                                      forward_out, reverse_out,
-                                                                     ref, options)
+                                                                     reference, options)
     elif reverse_in == 'NA':
-        cmd = 'bbduk.sh in={} out={} ref={}{}'.format(forward_in, forward_out, ref, options)
+        cmd = 'bbduk.sh in={} out={} ref={}{}'.format(forward_in, forward_out, reference, options)
     else:
         if reverse_out == 'NA':
             raise ValueError('Reverse output reads must be specified.')
         cmd = 'bbduk.sh in={} in2={} out={} out2={} ref={}{}'.format(forward_in, reverse_in,
                                                                      forward_out, reverse_out,
-                                                                     ref, options)
+                                                                     reference, options)
     out, err = accessoryfunctions.run_subprocess(cmd)
     return out, err
 
 
-def dedupe(infile, outfile, **kwargs):
+def dedupe(input, output, **kwargs):
     """
     Runs dedupe from the bbtools package.
-    :param infile: Input file.
-    :param outfile: Output file.
+    :param input: Input file.
+    :param output: Output file.
     :param kwargs: Arguments to give to dedupe in parameter=argument format. See dedupe documentation for full list.
     :return: out and err: stdout string and stderr string from running dedupe.
     """
     options = kwargs_to_string(kwargs)
-    cmd = 'dedupe.sh in={} out={}{}'.format(infile, outfile, options)
+    cmd = 'dedupe.sh in={} out={}{}'.format(input, output, options)
     out, err = accessoryfunctions.run_subprocess(cmd)
     return out, err
 
 
-def seal(ref, forward_in, output_file, reverse_in='NA', **kwargs):
+def seal(reference, forward_in, output_file, reverse_in='NA', **kwargs):
     """
     Runs seal from the bbtools package.
-    :param ref: Reference file, in fasta format.
+    :param reference: Reference file, in fasta format.
     :param forward_in: Forward reads, fastq format.
     :param output_file: Output file to put rpkm statistics into.
     :param reverse_in: Reverse reads. Not necessary to specify if in same folder and follow R1/R2 convention.

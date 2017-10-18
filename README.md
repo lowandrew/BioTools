@@ -14,7 +14,7 @@ Installation:
 ##### bbtools
 For all bbtools, additional options can be specified with argument='parameter' passed in after mandatory arguments.
 
-`bbtools.bbmap(reference, forward_reads, out_file)` Mandatory args: reference file (should be fasta 
+`bbtools.bbmap(reference, forward_in, out_bam)` Mandatory args: reference file (should be fasta 
 formatted), forward reads (reverse reads will be found automatically if R1/R2 naming convention is used), output file (sam or bam).
 If reverse reads do not follow naming convention, specify with reverse_in='path/to/reads'.
 
@@ -33,3 +33,16 @@ If convenction isn't followed, specify with reverse_in='path' and reverse_out='p
 `bbtools.dedupe(input, output)` Runs dedupe on input, writes to output.
 
 `bbtools.seal(reference, forward_in, rpkm)` Runs seal to generate rpkm stats on reference.
+
+##### jellyfish
+All jellyfish programs take additional options using options='string of options', where
+string of options is exactly the same as what you would enter on the command line.
+
+`jellyfish.count(forward_in, kmer_size=31, count_file='mer_counts.jf', hash_size='100M')` Runs jellyfish
+count, with a default kmer size of 31 and output file mer_counts.jf, finding canonical kmers.
+Can be run on reads or assemblies. If using paired-end reads and following the R1/R2 naming 
+ convention, reverse reads do not need to be specified. If not following convention, specify reverse reads
+ with reverse_in='path/to/reverse/reads'. Handles gzipped or plain-text files (bz2 support coming soon!)
+
+`jellyfish.dump(mer_file, outfile=counts.fasta)` Dumps the output file from jellyfish count (mer_file) into a human-readable
+format, default file outfile.fasta.
