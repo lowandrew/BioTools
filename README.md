@@ -2,7 +2,12 @@
 
 ## Program Dependencies
 
-- BBtools >= 37.23
+Testing done with: 
+- BBTools 37.23
+- jellyfish 2.2.6
+- mash 1.1.1
+
+Other versions of these programs should work, but no guarantees.
 
 ### Package currently under development.
 Installation: 
@@ -84,3 +89,16 @@ Reads a mash output file created by mash dist. Returns a list where each entry i
 the result file. Each item in the list has the following attributes: query, reference, distance, pvalue, and matching_hash.
 Distance and pvalue are floats, all others are returned as strings. For example, to get the distance between the query 
 and reference in a result_list for the result at index 2, use result_list[2].distance
+
+##### fasta
+
+Operations on fasta files.
+
+`fasta.clean_names(in_fasta, out_fasta='NA', method='split', delimiter='NA', truncate_value=10)`
+
+Cleans up titles on fasta files in case they're too long, making programs not like them.
+Only mandatory argument is in_fasta. On default settings, will split titles on whitespace, modifying the input file.
+Can specify output file using out_fasta.
+Can be changed to other delimiters by changing the delimiter argument. Other option is to truncate to a number
+of characters, default 10. To switch to this, use the argument method='truncate'. Any other parameter for the method
+argument will result in a ValueError.
