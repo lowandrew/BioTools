@@ -262,7 +262,7 @@ def seal(reference, forward_in, output_file, reverse_in='NA', **kwargs):
     :param output_file: Output file to put rpkm statistics into.
     :param reverse_in: Reverse reads. Not necessary to specify if in same folder and follow R1/R2 convention.
     :param kwargs: Arguments to give to seal in parameter=argument format. See seal documentation for full list.
-    :return: out and err: stdout string and stderr string from running dedupe.
+    :return: out and err: stdout string and stderr string from running seal.
     """
     options = kwargs_to_string(kwargs)
     if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA' and 'R1' in forward_in:
@@ -274,3 +274,44 @@ def seal(reference, forward_in, output_file, reverse_in='NA', **kwargs):
         cmd = 'seal.sh ref={} in={} in2={} rpkm={} nodisk{}'.format(reference, forward_in, reverse_in, output_file, options)
     out, err = accessoryfunctions.run_subprocess(cmd)
     return out, err
+
+
+def kmercountexact(forward_in, reverse_in='NA', **kwargs):
+    """
+    Wrapper for kmer count exact.
+    :param forward_in: Forward input reads.
+    :param reverse_in: Reverse input reads. Found automatically for certain conventions.
+    :param kwargs: Arguments to give to kmercountexact in parameter='argument' format.
+    See kmercountexact documentation for full list.
+    :return: out and err: stdout string and stderr string from running kmercountexact.
+    """
+    options = kwargs_to_string(kwargs)
+    if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA' and 'R1' in forward_in:
+        reverse_in = forward_in.replace('R1', 'R2')
+        cmd = 'kmercountexact.sh in={} in2={} {}'.format(forward_in, reverse_in, options)
+    elif reverse_in == 'NA':
+        cmd = 'kmercountexact.sh in={} {}'.format(forward_in, options)
+    else:
+        cmd = 'kmercountexact.sh in={} in2={} {}'.format(forward_in, reverse_in, options)
+    out, err = accessoryfunctions.run_subprocess(cmd)
+    return out, err
+
+
+def genome_size(peaks_file, haploid=True):
+    """
+    Finds the genome size of an organsim, based on the peaks file created by kmercountexact.sh
+    :param peaks_file: Path to peaks file created by kmercountexact.
+    :param haploid: Set to True if organism of interest is haploid, False if not. Default True.
+    :return: size of genome, as an int. If size could not be found, return will be 0.
+    """
+    size = 0
+    with open(peaks_file) as peaks:
+        lines = peaks.readlines()
+    for line in lines:
+        if haploid:
+            if '#haploid_genome_size' in line:
+                size = int(line.split()[1])
+        else:
+            if '#genome_size' in line:
+                size = int(line.split()[1])
+    return size
