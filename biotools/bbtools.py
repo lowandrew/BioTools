@@ -27,7 +27,7 @@ def bbmap(reference, forward_in, out_bam, reverse_in='NA', **kwargs):
     :return: out and err: stdout string and stderr string from running bbmap.
     """
     options = kwargs_to_string(kwargs)
-    if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA':
+    if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA' and 'R1' in forward_in:
         reverse_in = forward_in.replace('R1', 'R2')
         cmd = 'bbmap.sh ref={} in={} in2={} out={} nodisk{}'.format(reference, forward_in, reverse_in, out_bam, options)
     elif reverse_in == 'NA':
@@ -58,7 +58,7 @@ def bbduk_trim(forward_in, forward_out, reverse_in='NA', reverse_out='NA', **kwa
     except subprocess.CalledProcessError:
         print('ERROR: Could not find bbduk. Plase check that the bbtools package is installed and on your $PATH.\n\n')
         raise FileNotFoundError
-    if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA':
+    if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA' and 'R1' in forward_in:
         reverse_in = forward_in.replace('R1', 'R2')
         if reverse_out == 'NA':
             if 'R1' in forward_out:
@@ -84,6 +84,94 @@ def bbduk_trim(forward_in, forward_out, reverse_in='NA', reverse_out='NA', **kwa
     return out, err
 
 
+def tadpole(forward_in, forward_out, reverse_in='NA', reverse_out='NA', mode='correct', **kwargs):
+    """
+    Runs tadpole. Default is to run in correction mode, but other modes ('contig', 'extend') can also be specified.
+    :param forward_in: Forward input reads.
+    :param forward_out: Forward output reads.
+    :param reverse_in: Reverse reads. Only specify if not following R1/R2 convention/not in same folder as input.
+    :param reverse_out: Reverse output reads. Automatically generated unless specified.
+    :param mode: Mode to run tadpole in. Default is 'correct'.
+    :param kwargs: Other arguments to give to tadpole in parameter='argument' format. See tadpole documentation for full list.
+    :return: out and err: stdout string and stderr string from running tadpole.
+    """
+    options = kwargs_to_string(kwargs)
+    if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA' and 'R1' in forward_in:
+        reverse_in = forward_in.replace('R1', 'R2')
+        if reverse_out == 'NA':
+            if 'R1' in forward_out:
+                reverse_out = forward_out.replace('R1', 'R2')
+            else:
+                raise ValueError('If you do not specify reverse_out, forward_out must contain R1.\n\n')
+        cmd = 'tadpole.sh in1={} in2={} out1={} out2={} mode={} {}'.format(forward_in, reverse_in,
+                                                                           forward_out, reverse_out,
+                                                                           mode, options)
+    elif reverse_in == 'NA':
+        cmd = 'tadpole.sh in={} out={} mode={} {}'.format(forward_in, forward_out, mode, options)
+    else:
+        if reverse_out == 'NA':
+            raise ValueError('Reverse output reads must be specified.')
+        cmd = 'tadpole.sh in1={} in2={} out1={} out2={} mode={} {}'.format(forward_in, reverse_in,
+                                                                           forward_out, reverse_out,
+                                                                           mode, options)
+    out, err = accessoryfunctions.run_subprocess(cmd)
+    return out, err
+
+
+def bbnorm(forward_in, forward_out, reverse_in='NA', reverse_out='NA', **kwargs):
+    """
+    Runs bbnorm to normalize read depth. Default target kmer depth is left at bbnorm's default, which is 100.
+    :param forward_in: Forward input reads.
+    :param forward_out: Forward output reads.
+    :param reverse_in: Reverse reads. Only specify if not following R1/R2 convention/not in same folder as input.
+    :param reverse_out: Reverse output reads. Automatically generated unless specified.
+    :param kwargs: Other arguments to give to bbnorm in parameter='argument' format. See bbnorm documentation for full list.
+    :return: out and err: stdout string and stderr string from running bbnorm.
+    """
+    options = kwargs_to_string(kwargs)
+    if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA' and 'R1' in forward_in:
+        reverse_in = forward_in.replace('R1', 'R2')
+        if reverse_out == 'NA':
+            if 'R1' in forward_out:
+                reverse_out = forward_out.replace('R1', 'R2')
+            else:
+                raise ValueError('If you do not specify reverse_out, forward_out must contain R1.\n\n')
+        cmd = 'bbnorm.sh in1={} in2={} out1={} out2={} {}'.format(forward_in, reverse_in,
+                                                                  forward_out, reverse_out,
+                                                                  options)
+    elif reverse_in == 'NA':
+        cmd = 'bbnorm.sh in={} out={} {}'.format(forward_in, forward_out, options)
+    else:
+        if reverse_out == 'NA':
+            raise ValueError('Reverse output reads must be specified.')
+        cmd = 'bbnorm.sh in1={} in2={} out1={} out2={} {}'.format(forward_in, reverse_in,
+                                                                  forward_out, reverse_out,
+                                                                  options)
+    out, err = accessoryfunctions.run_subprocess(cmd)
+    return out, err
+
+
+def bbmerge(forward_in, merged_reads, reverse_in='NA', **kwargs):
+    """
+    Runs bbmerge.
+    :param forward_in: Forward input reads. Reverse reads automatically detected if present in the same folder.
+    :param merged_reads: Output file to write merged reads to.
+    :param reverse_in: Reverse input file, if you don't want it autodetected.
+    :param kwargs: Other arguments to give to bbmerge in parameter='argument' format. See bbmerge documentation for full list.
+    :return: out and err: stdout string and stderr string from running bbmerge.
+    """
+    options = kwargs_to_string(kwargs)
+    if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA' and 'R1' in forward_in:
+        reverse_in = forward_in.replace('R1', 'R2')
+        cmd = 'bbmerge.sh in={} in2={} out={} {}'.format(forward_in, reverse_in, merged_reads, options)
+    elif reverse_in == 'NA':
+        cmd = 'bbmerge.sh in={} out={} {}'.format(forward_in, merged_reads, options)
+    else:
+        cmd = 'bbmerge.sh in={} in2={} out={} {}'.format(forward_in, reverse_in, merged_reads, options)
+    out, err = accessoryfunctions.run_subprocess(cmd)
+    return out, err
+
+
 def bbduk_bait(reference, forward_in, forward_out, reverse_in='NA', reverse_out='NA', **kwargs):
     """
     Uses bbduk to bait out reads that have kmers matching to a reference.
@@ -96,7 +184,7 @@ def bbduk_bait(reference, forward_in, forward_out, reverse_in='NA', reverse_out=
     :return: out and err: stdout string and stderr string from running bbduk.
     """
     options = kwargs_to_string(kwargs)
-    if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA':
+    if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA' and 'R1' in forward_in:
         reverse_in = forward_in.replace('R1', 'R2')
         if reverse_out == 'NA':
             if 'R1' in forward_out:
@@ -130,7 +218,7 @@ def bbduk_filter(reference, forward_in, forward_out, reverse_in='NA', reverse_ou
     :return: out and err: stdout string and stderr string from running bbduk.
     """
     options = kwargs_to_string(kwargs)
-    if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA':
+    if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA' and 'R1' in forward_in:
         reverse_in = forward_in.replace('R1', 'R2')
         if reverse_out == 'NA':
             if 'R1' in forward_out:
@@ -152,16 +240,16 @@ def bbduk_filter(reference, forward_in, forward_out, reverse_in='NA', reverse_ou
     return out, err
 
 
-def dedupe(input, output, **kwargs):
+def dedupe(input_file, output_file, **kwargs):
     """
     Runs dedupe from the bbtools package.
-    :param input: Input file.
-    :param output: Output file.
+    :param input_file: Input file.
+    :param output_file: Output file.
     :param kwargs: Arguments to give to dedupe in parameter=argument format. See dedupe documentation for full list.
     :return: out and err: stdout string and stderr string from running dedupe.
     """
     options = kwargs_to_string(kwargs)
-    cmd = 'dedupe.sh in={} out={}{}'.format(input, output, options)
+    cmd = 'dedupe.sh in={} out={}{}'.format(input_file, output_file, options)
     out, err = accessoryfunctions.run_subprocess(cmd)
     return out, err
 
@@ -177,12 +265,12 @@ def seal(reference, forward_in, output_file, reverse_in='NA', **kwargs):
     :return: out and err: stdout string and stderr string from running dedupe.
     """
     options = kwargs_to_string(kwargs)
-    if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA':
+    if os.path.isfile(forward_in.replace('R1', 'R2')) and reverse_in == 'NA' and 'R1' in forward_in:
         reverse_in = forward_in.replace('R1', 'R2')
-        cmd = 'seal.sh ref={} in={} in2={} rpkm={} nodisk{}'.format(ref, forward_in, reverse_in, output_file, options)
+        cmd = 'seal.sh ref={} in={} in2={} rpkm={} nodisk{}'.format(reference, forward_in, reverse_in, output_file, options)
     elif reverse_in == 'NA':
-        cmd = 'seal.sh ref={} in={} rpkm={} nodisk{}'.format(ref, forward_in, output_file, options)
+        cmd = 'seal.sh ref={} in={} rpkm={} nodisk{}'.format(reference, forward_in, output_file, options)
     else:
-        cmd = 'seal.sh ref={} in={} in2={} rpkm={} nodisk{}'.format(ref, forward_in, reverse_in, output_file, options)
+        cmd = 'seal.sh ref={} in={} in2={} rpkm={} nodisk{}'.format(reference, forward_in, reverse_in, output_file, options)
     out, err = accessoryfunctions.run_subprocess(cmd)
     return out, err

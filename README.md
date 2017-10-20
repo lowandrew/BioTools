@@ -41,15 +41,36 @@ If convenction isn't followed, specify with reverse_in='path' and reverse_out='p
 
 Filters reads in input that match reference, writes clean reads to output.
 As with bbmap, if R1/R2 naming convention is used, reverse input/output don't need to be specified.
-If convenction isn't followed, specify with reverse_in='path' and reverse_out='path'
+If convention isn't followed, specify with reverse_in='path' and reverse_out='path'
 
-`bbtools.dedupe(input, output)` 
+`bbtools.dedupe(input_file, output_file)` 
 
-Runs dedupe on input, writes to output.
+Runs dedupe on input_file, writes to output_file.
 
 `bbtools.seal(reference, forward_in, rpkm)` 
 
 Runs seal to generate rpkm stats on reference.
+
+`bbtools.bbnorm(forward_in, forward_out, reverse_in='NA', reverse_out='NA')`
+
+Runs bbnorm on forward_in, writes to forward_out. 
+Reverse in and out names are auto-generated
+if R1/R2 naming convention followed and reverse reads are in the same folder.
+If convention isn't followed, specify with reverse_in='path' and reverse_out='path'. 
+Default target kmer depth is 100 - can be changed with argument target='depth'.
+
+`bbtools.bbmerge(forward_in, merged_reads, reverse_in='NA')`
+
+Runs bbmerge to join overlapping forward and reverse reads. As with other bbtools, reverse
+reads autodetected if R1/R2 convention followed and reads are in the same folder.
+
+`bbtools.tadpole(forward_in, forward_out, reverse_in='NA', reverse_out='NA', mode='correct')`
+
+Runs tadpole, in read correction mode by default. Other modes can be specifed with mode='alternate_mode'.
+Reverse in and out names are auto-generated
+if R1/R2 naming convention followed and reverse reads are in the same folder.
+If convention isn't followed, specify with reverse_in='path' and reverse_out='path'. 
+
 
 ##### jellyfish
 All jellyfish programs take additional options using options='string of options', where
