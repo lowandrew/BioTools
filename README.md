@@ -6,6 +6,7 @@ Testing done with:
 - BBTools 37.23
 - jellyfish 2.2.6
 - mash 1.1.1
+- KMC 3.0
 
 Other versions of these programs should work, but no guarantees.
 
@@ -133,3 +134,22 @@ Can specify output file using out_fasta.
 Can be changed to other delimiters by changing the delimiter argument. Other option is to truncate to a number
 of characters, default 10. To switch to this, use the argument method='truncate'. Any other parameter for the method
 argument will result in a ValueError.
+
+##### kmc
+
+Wrappers for the kmc kmer counter. Only tested with KMC 3.0. Other paramters should be input
+in argument='parameter' format. If the argument is a flag, use argument=''
+
+`kmc.kmc(forward_in, database_name, min_occurrences=1, reverse_in='NA', k=31, cleanup=True, tmpdir='tmp')`
+
+Runs kmc on forward reads, writes database to database_name, with a kmer size of 31. Reverse reads
+automatically found if in same folder and following R1/R2 convention. Assumes fastq input - for fasta, add fm=''.
+
+`kmc.dump(database, output, min_occurences=1, max_occurences=250)`
+
+Dumps a database to output in tab-delimited format. No other parameters can be passed to this command.
+
+`kmc.intersect(database_1, database_2, results)`
+
+Finds kmers that are in both database_2 and database_1 and writes them to database in results. 
+No other parameters can be passed to this command.
