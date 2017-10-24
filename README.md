@@ -115,6 +115,11 @@ acceptable.
 Runs mash dist on positional arguments (as with `mash.sketch`, any number can be passed in and patterns work).
 Outputs results to a tab-delimited file which can be interpreted by `mash.read_mash_output`
 
+`mash.screen(sketch_file, file_1, file_2, output_file='screen.tab', threads=1)`
+
+Runs mash screen on positional arguments. First argument must be a sketch file, followed by as many fasta/fastq files
+ as you want. 
+
 `mash.read_mash_output(result_file)`
 
 Reads a mash output file created by mash dist. Returns a list where each entry in the list represents one row from 

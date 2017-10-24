@@ -52,10 +52,28 @@ def dist(*args, output_file='distances.tab', threads=1, **kwargs):
     :param output_file: Output file to write your distances to. Default distances.tab
     :param threads: Number of threads to run mash on.
     :param kwargs: Other arguments, in parameter='argument' format. If parameter is just a switch, do parameter=''
-    :return: stdout and stderr from mash sketch
+    :return: stdout and stderr from mash dist
     """
     options = kwargs_to_string(kwargs)
     cmd = 'mash dist '
+    for arg in args:
+        cmd += arg + ' '
+    cmd += ' -p {} {} > {}'.format(str(threads), options, output_file)
+    out, err = accessoryfunctions.run_subprocess(cmd)
+    return out, err
+
+
+def screen(*args, output_file='screen.tab', threads=1, **kwargs):
+    """
+    Wrapper for mash screen. Requires mash v2.0 or higher.
+    :param args: Files you want to screen. First argument must be a sketch.
+    :param output_file: Output to write containment info to.
+    :param threads: Number of threads to run mash on.
+    :param kwargs: Other arguments, in parameter='argument' format. If parameter is just a switch, do parameter=''
+    :return: stdout and stderr from mash screen
+    """
+    options = kwargs_to_string(kwargs)
+    cmd = 'mash screen '
     for arg in args:
         cmd += arg + ' '
     cmd += ' -p {} {} > {}'.format(str(threads), options, output_file)
