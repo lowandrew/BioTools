@@ -115,7 +115,7 @@ def tadpole(forward_in, forward_out, reverse_in='NA', reverse_out='NA', mode='co
                                                                            forward_out, reverse_out,
                                                                            mode, options)
     out, err = accessoryfunctions.run_subprocess(cmd)
-    return out, err
+    return out, err, cmd
 
 
 def bbnorm(forward_in, forward_out, reverse_in='NA', reverse_out='NA', **kwargs):
@@ -147,8 +147,12 @@ def bbnorm(forward_in, forward_out, reverse_in='NA', reverse_out='NA', **kwargs)
         cmd = 'bbnorm.sh in1={} in2={} out1={} out2={} {}'.format(forward_in, reverse_in,
                                                                   forward_out, reverse_out,
                                                                   options)
-    out, err = accessoryfunctions.run_subprocess(cmd)
-    return out, err
+    if not os.path.isfile(forward_out):
+        out, err = accessoryfunctions.run_subprocess(cmd)
+    else:
+        out = str()
+        err = str()
+    return out, err, cmd
 
 
 def bbmerge(forward_in, merged_reads, reverse_in='NA', **kwargs):
@@ -168,8 +172,12 @@ def bbmerge(forward_in, merged_reads, reverse_in='NA', **kwargs):
         cmd = 'bbmerge.sh in={} out={} {}'.format(forward_in, merged_reads, options)
     else:
         cmd = 'bbmerge.sh in={} in2={} out={} {}'.format(forward_in, reverse_in, merged_reads, options)
-    out, err = accessoryfunctions.run_subprocess(cmd)
-    return out, err
+    if not os.path.isfile(merged_reads):
+        out, err = accessoryfunctions.run_subprocess(cmd)
+    else:
+        out = str()
+        err = str()
+    return out, err, cmd
 
 
 def bbduk_bait(reference, forward_in, forward_out, reverse_in='NA', reverse_out='NA', **kwargs):
@@ -293,8 +301,12 @@ def kmercountexact(forward_in, reverse_in='NA', **kwargs):
         cmd = 'kmercountexact.sh in={} {}'.format(forward_in, options)
     else:
         cmd = 'kmercountexact.sh in={} in2={} {}'.format(forward_in, reverse_in, options)
-    out, err = accessoryfunctions.run_subprocess(cmd)
-    return out, err
+    try:
+        out, err = accessoryfunctions.run_subprocess(cmd)
+    except subprocess.CalledProcessError as e:
+        out = str()
+        err = e
+    return out, err, cmd
 
 
 def genome_size(peaks_file, haploid=True):
